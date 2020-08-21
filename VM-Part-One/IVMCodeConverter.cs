@@ -6,6 +6,6 @@ namespace VM_Part_One
 {
     interface IVMCodeConverter
     {
-        string[] VMCodeConverter(string vmCode);
+        string[] VMCodeConverter(string vmCode, int lineNumber);
     }
 }

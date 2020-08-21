@@ -7,6 +7,6 @@ namespace VM_Part_One
 {
     interface IOutPut
     {
-        void OutPut(StreamWriter writer);
+        void Write(string[] data);
     }
 }
