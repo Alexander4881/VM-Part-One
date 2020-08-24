@@ -8,29 +8,34 @@ namespace VM_Part_One
     class OutPutFile : IOutPut
     {
         string fileLocation;
-        StreamWriter writer;
-        public StreamWriter Writer { get => writer; set => writer = value; }
 
-        public OutPutFile(StreamWriter writer,string localFile)
+        public OutPutFile(string localFile)
         {
-            Writer = writer;
             fileLocation = localFile;
         }
 
 
         public void Write(string[] data)
         {
-            foreach (string line in data)
+            using (StreamWriter wr = new StreamWriter(fileLocation,true))
             {
-                Writer.WriteLine(line);
+                foreach (string line in data)
+                {
+                    wr.WriteLine(line);
+                } 
             }
-            Writer.Flush();
+            //Writer.Flush();
         }
 
+        /// <summary>
+        /// copy temp file to a given file
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="fileType"></param>
         public void SaveFile(string path,string name, string fileType)
         {
-            Writer.Close();
-            File.Copy(fileLocation,$"{path}/{name}.{fileType}");
+            File.Copy(fileLocation,$"{path}/{name}.{fileType}",true);
         }
     }
 }

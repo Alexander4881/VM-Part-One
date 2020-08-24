@@ -6,11 +6,12 @@ namespace VM_Part_One
     class Program
     {
         private static readonly string tempFile = "./temp.txt";
+        private static readonly string tempFileWrite = "./tempWrite.txt";
 
         static void Main(string[] args)
         {
             InPutFile input = new InPutFile();
-            OutPutFile outPut = new OutPutFile(new StreamWriter(tempFile), tempFile);
+            OutPutFile outPut = new OutPutFile(tempFileWrite);
             VMCode vmCode = new VMCode();
 
             try
@@ -19,17 +20,26 @@ namespace VM_Part_One
 
                 input.RemoveComments(reader, new StreamWriter(tempFile, false));
 
+                reader = input.InPut(tempFile);
+
                 try
                 {
                     string line;
                     short lineNum = 0;
 
+                    outPut.Write(vmCode.SetStartPointers());
+
                     while ((line = reader.ReadLine()) != null)
                     {
+                        line = line.ToUpper();
                         string[] temp = vmCode.VMCodeConverter(line, lineNum);
                         outPut.Write(temp);
                         lineNum++;
                     }
+
+                    vmCode.EndFile();
+
+                    Console.WriteLine("Done Done !!!!!");
                 }
                 catch (Exception e)
                 {
@@ -38,6 +48,9 @@ namespace VM_Part_One
                 finally
                 {
                     reader.Close();
+                    outPut.SaveFile("./","testVMCode","vm");
+                    File.Delete(tempFile);
+                    File.Delete(tempFileWrite);
                 }
 
             }
@@ -80,11 +93,9 @@ namespace VM_Part_One
             return inputFilePath;
         }
 
-
-
         private static bool ValidFile(string path)
         {
-            if (path.Contains(".txt") && File.Exists(path))
+            if (path.Contains(".vm") && File.Exists(path))
             {
                 return true;
             }

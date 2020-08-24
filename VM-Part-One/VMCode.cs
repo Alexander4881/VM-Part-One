@@ -11,24 +11,62 @@ namespace VM_Part_One
         private readonly static short argumentPointer = 400;
         private readonly static short thisPointer = 3000;
         private readonly static short thatPointer = 3010;
-        private readonly static short globalPointer = 3020;
 
-        Dictionary<string, short> stack = new Dictionary<string, short>()
+        public string[] EndFile()
         {
-            { "local", localPointer },
-            { "argument", argumentPointer },
-            { "this", thisPointer },
-            { "that", thatPointer },
-            { "static", globalPointer }
-        };
+            List<string> temp = new List<string>();
 
-        public Dictionary<string, short> Stack { get => stack; set => stack = value; }
+            temp.Add("(END)");
+            temp.Add("@END");
+            temp.Add("0;JMP");
+
+            return temp.ToArray();
+        }
+
+        public string[] SetStartPointers()
+        {
+            List<string> temp = new List<string>();
+
+            //Pointer
+            temp.Add("@" + stackPointer);
+            temp.Add("D=A");
+            temp.Add("@SP");
+            temp.Add("M=D");
+
+            //Local
+            temp.Add("@" + localPointer);
+            temp.Add("D=A");
+            temp.Add("@LCL");
+            temp.Add("M=D");
+
+            //ARG
+            temp.Add("@" + argumentPointer);
+            temp.Add("D=A");
+            temp.Add("@ARG");
+            temp.Add("M=D");
+
+            //THIS
+            temp.Add("@" + thisPointer);
+            temp.Add("D=A");
+            temp.Add("@THIS");
+            temp.Add("M=D");
+
+            //THAT
+            temp.Add("@" + thatPointer);
+            temp.Add("D=A");
+            temp.Add("@THAT");
+            temp.Add("M=D");
+
+            return temp.ToArray();
+        }
 
         public string[] VMCodeConverter(string vmCode, int lineNumber)
         {
             string[] split = vmCode.Split(" ");
             CommandType type = (CommandType)Enum.Parse(typeof(CommandType), split[0]);
             List<string> temp = new List<string>();
+
+
 
             switch (type)
             {
@@ -38,8 +76,8 @@ namespace VM_Part_One
                     temp.Add("D=M");
                     temp.Add("A=A-1");
                     temp.Add("M=D+M");
-
                     break;
+
                 case CommandType.SUB:
                     temp.Add("@SP");
                     temp.Add("AM=M-1");
@@ -49,13 +87,13 @@ namespace VM_Part_One
                     temp.Add("D=D-M");
                     temp.Add("A=A-1");
                     temp.Add("M=D");
-
                     break;
+
                 case CommandType.NEG:
                     temp.Add("@SP");
                     temp.Add("A=M-1");
                     temp.Add("D=M");
-
+                    // we user lineNumber as a uniqe identifyer
                     temp.Add("@LESSTHAN" + lineNumber + "");
                     temp.Add("D;JLT");
 
@@ -155,7 +193,7 @@ namespace VM_Part_One
                     temp.Add("M=!M");
                     break;
                 case CommandType.PUSH:
-                    MemoryAccess memoryAccess = (MemoryAccess)Enum.Parse(typeof(MemoryAccess), split[1].ToUpper());
+                    MemoryAccess memoryAccess = (MemoryAccess)Enum.Parse(typeof(MemoryAccess), split[1]);
                     switch (memoryAccess)
                     {
                         case MemoryAccess.ARGUMENT:
@@ -263,7 +301,7 @@ namespace VM_Part_One
                     break;
                 case CommandType.POP:
 
-                    MemoryAccess memoryAccesss = (MemoryAccess)Enum.Parse(typeof(MemoryAccess), split[1].ToUpper());
+                    MemoryAccess memoryAccesss = (MemoryAccess)Enum.Parse(typeof(MemoryAccess), split[1]);
                     switch (memoryAccesss)
                     {
                         case MemoryAccess.ARGUMENT:

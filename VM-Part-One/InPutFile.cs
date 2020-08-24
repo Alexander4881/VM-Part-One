@@ -48,7 +48,6 @@ namespace VM_Part_One
             }
             finally
             {
-                reader.Close();
                 writer.Close();
             }
         }

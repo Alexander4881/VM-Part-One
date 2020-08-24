@@ -7,5 +7,9 @@ namespace VM_Part_One
     interface IVMCodeConverter
     {
         string[] VMCodeConverter(string vmCode, int lineNumber);
+
+        string[] SetStartPointers();
+
+        string[] EndFile();
     }
 }
