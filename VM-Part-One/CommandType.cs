@@ -16,6 +16,12 @@ namespace VM_Part_One
         OR,
         NOT,
         PUSH,
-        POP
+        POP,
+        LABLE,
+        GOTO,
+        IFGOTO,
+        FUNCTION,
+        RETURN,
+        CALL
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace VM_Part_One
@@ -11,6 +12,7 @@ namespace VM_Part_One
         private readonly static short argumentPointer = 400;
         private readonly static short thisPointer = 3000;
         private readonly static short thatPointer = 3010;
+        int labelNum;
 
         public string[] EndFile()
         {
@@ -63,6 +65,12 @@ namespace VM_Part_One
         public string[] VMCodeConverter(string vmCode, int lineNumber)
         {
             string[] split = vmCode.Split(" ");
+            // remove - in the if-goto command
+            if (split[0].Contains("-"))
+            {
+                split[0] = split[0].Replace("-", "");
+            }
+
             CommandType type = (CommandType)Enum.Parse(typeof(CommandType), split[0]);
             List<string> temp = new List<string>();
 
@@ -81,12 +89,9 @@ namespace VM_Part_One
                 case CommandType.SUB:
                     temp.Add("@SP");
                     temp.Add("AM=M-1");
-                    temp.Add("A=A-1");
                     temp.Add("D=M");
-                    temp.Add("A=A+1");
-                    temp.Add("D=D-M");
                     temp.Add("A=A-1");
-                    temp.Add("M=D");
+                    temp.Add("M=M-D");
                     break;
 
                 case CommandType.NEG:
@@ -116,7 +121,7 @@ namespace VM_Part_One
                     temp.Add("AM=M-1");
                     temp.Add("D=M");
                     temp.Add("A=A-1");
-                    temp.Add("D=D-M");
+                    temp.Add("D=M-D");
                     temp.Add("@NOTEQUAL" + lineNumber + "");
                     temp.Add("D;JNE");
                     temp.Add("@SP");
@@ -136,7 +141,7 @@ namespace VM_Part_One
                     temp.Add("AM=M-1");
                     temp.Add("D=M");
                     temp.Add("A=A-1");
-                    temp.Add("D=D-M");
+                    temp.Add("D=M-D");
                     temp.Add("@GREATHERTHAN" + lineNumber + "");
                     temp.Add("D;JGE");
                     temp.Add("@SP");
@@ -157,7 +162,7 @@ namespace VM_Part_One
                     temp.Add("AM=M-1");
                     temp.Add("D=M");
                     temp.Add("A=A-1");
-                    temp.Add("D=D-M");
+                    temp.Add("D=M-D");
                     temp.Add("@LESSTHAN" + lineNumber + "");
                     temp.Add("D;JLE");
                     temp.Add("@SP");
@@ -320,10 +325,10 @@ namespace VM_Part_One
                             temp.Add("M=D");
                             break;
                         case MemoryAccess.LOCAL:
-                            temp.Add("@" + split[2]);
-                            temp.Add("D=A");
                             temp.Add("@LCL");
-                            temp.Add("D=D+M");
+                            temp.Add("D=M");
+                            temp.Add("@" + split[2]);
+                            temp.Add("D=D+A");
                             temp.Add("@R13");
                             temp.Add("M=D");
 
@@ -418,6 +423,164 @@ namespace VM_Part_One
                             temp.Add("A=M");
                             temp.Add("M=D");
                             break;
+                    }
+                    break;
+
+                case CommandType.LABLE:
+                    temp.Add($"({split[1]})");
+                    break;
+
+                case CommandType.GOTO:
+                    temp.Add("@" + split[1]);
+                    temp.Add("0;JMP");
+                    break;
+
+                case CommandType.IFGOTO:
+                    temp.Add("@SP");
+                    temp.Add("AM=M-1");
+                    temp.Add("D=M");
+                    temp.Add("A=A-1");
+                    temp.Add("@" + split[1]);
+                    temp.Add("D;JNE");
+                    break;
+
+                case CommandType.CALL:
+                    // TODO: make call
+                    string lable = "RETURN_LABEL" + labelNum;
+                    labelNum++;
+
+                    
+                    temp.Add("@" + split[1]);
+                    temp.Add("D=A");
+                    temp.Add("@SP");
+                    temp.Add("A=M");
+                    temp.Add("M=D");
+                    temp.Add("@SP");
+                    temp.Add("M=M+1");
+                    // push 
+                    // push lcl
+                    temp.Add("@LCL");
+                    temp.Add("D=M");
+                    temp.Add("@SP");
+                    temp.Add("A=M");
+                    temp.Add("M=D");
+                    temp.Add("@SP");
+                    temp.Add("M=M+1");
+                    // ARG
+                    temp.Add("@ARG");
+                    temp.Add("D=M");
+                    temp.Add("@SP");
+                    temp.Add("A=M");
+                    temp.Add("M=D");
+                    temp.Add("@SP");
+                    temp.Add("M=M+1");
+                    // THIS
+                    temp.Add("@THIS");
+                    temp.Add("D=M");
+                    temp.Add("@SP");
+                    temp.Add("A=M");
+                    temp.Add("M=D");
+                    temp.Add("@SP");
+                    temp.Add("M=M+1");
+                    // THAT
+                    temp.Add("@THAT");
+                    temp.Add("D=M");
+                    temp.Add("@SP");
+                    temp.Add("A=M");
+                    temp.Add("M=D");
+                    temp.Add("@SP");
+                    temp.Add("M=M+1");
+                    
+
+                    temp.Add("@SP");
+                    temp.Add("D=M");
+                    temp.Add("@5");
+                    temp.Add("D=D-A");
+                    temp.Add("@" + split[2]);
+                    temp.Add("D=D-A");
+                    temp.Add("@ARG");
+                    temp.Add("M=D");
+                    temp.Add("@SP");
+                    temp.Add("D=M");
+                    temp.Add("@LCL");
+                    temp.Add("M=D");
+                    temp.Add("@" + split[1]);
+                    temp.Add("0;JMP");
+                    temp.Add($"({split[1]})");
+
+
+                    break;
+
+                case CommandType.RETURN:
+                    // TODO: make return
+                    temp.Add("@LCL");
+                    temp.Add("D=M");
+                    temp.Add("@FRAME");
+                    temp.Add("@5");
+                    temp.Add("A=D-A");
+                    temp.Add("D=M");
+                    temp.Add("@RET");
+                    temp.Add("M=D");
+                    // POP FORMAT 1
+                    temp.Add("@ARG");
+                    temp.Add("D=M");
+                    temp.Add("@0");
+                    temp.Add("D=D+A");
+                    temp.Add("@R13");
+                    temp.Add("M=D");
+                    temp.Add("@SP");
+                    temp.Add("AM=M-1");
+                    temp.Add("D=M");
+                    temp.Add("@R13");
+                    temp.Add("A=M");
+                    temp.Add("M=D");
+                    
+                    
+                    temp.Add("@ARG");
+                    temp.Add("D=M");
+                    temp.Add("@SP");
+                    temp.Add("M=D+1");
+                    temp.Add("@FRAME");
+                    temp.Add("D=M-1");
+                    temp.Add("AM=D");
+                    temp.Add("D=M");
+                    temp.Add("@THAT");
+                    temp.Add("M=D");
+                    temp.Add("@FRAME");
+                    temp.Add("D=M-1");
+                    temp.Add("AM=D");
+                    temp.Add("D=M");
+                    temp.Add("@THIS");
+                    temp.Add("M=D");
+                    temp.Add("@FRAME");
+                    temp.Add("D=M-1");
+                    temp.Add("AM=D");
+                    temp.Add("D=M");
+                    temp.Add("@ARG");
+                    temp.Add("M=D");
+                    temp.Add("@FRAME");
+                    temp.Add("D=M-1");
+                    temp.Add("AM=D");
+                    temp.Add("D=M");
+                    temp.Add("@LCL");
+                    temp.Add("M=D");
+                    temp.Add("@RET");
+                    temp.Add("A=M");
+                    temp.Add("0;JMP");
+                    break;
+
+                case CommandType.FUNCTION:
+                    // TODO: make function
+                    temp.Add($"({split[1]})");
+                    for (int i = 0; i < int.Parse(split[2]); i++)
+                    {
+                        temp.Add("@0");
+                        temp.Add("D=A");
+                        temp.Add("@SP");
+                        temp.Add("A=M");
+                        temp.Add("M=D");
+                        temp.Add("@SP");
+                        temp.Add("M=M+1");
                     }
                     break;
             }

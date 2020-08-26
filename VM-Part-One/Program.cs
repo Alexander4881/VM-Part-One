@@ -27,17 +27,19 @@ namespace VM_Part_One
                     string line;
                     short lineNum = 0;
 
-                    outPut.Write(vmCode.SetStartPointers());
+                    //outPut.Write(vmCode.SetStartPointers());
+                    
 
                     while ((line = reader.ReadLine()) != null)
                     {
                         line = line.ToUpper();
+                        //outPut.Write(new string[] { $"// {line}" });
                         string[] temp = vmCode.VMCodeConverter(line, lineNum);
                         outPut.Write(temp);
                         lineNum++;
                     }
 
-                    vmCode.EndFile();
+                    //vmCode.EndFile();
 
                     Console.WriteLine("Done Done !!!!!");
                 }
@@ -48,7 +50,7 @@ namespace VM_Part_One
                 finally
                 {
                     reader.Close();
-                    outPut.SaveFile("./","testVMCode","vm");
+                    outPut.SaveFile("./","testVMCode","asm");
                     File.Delete(tempFile);
                     File.Delete(tempFileWrite);
                 }

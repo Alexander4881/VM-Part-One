@@ -22,9 +22,9 @@ namespace VM_Part_One
                 foreach (string line in data)
                 {
                     wr.WriteLine(line);
-                } 
+                }
+                wr.Close();
             }
-            //Writer.Flush();
         }
 
         /// <summary>
